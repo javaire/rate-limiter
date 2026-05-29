@@ -6,6 +6,10 @@ import { RateLimitStore } from "./rateLimit/types"
 export function createApp(store: RateLimitStore): Express {
   const app = express()
 
+  app.get("/health", (_req, res) => {
+    res.status(200).json({ status: "ok" })
+  })
+
   app.get("/foo", auth, rateLimit(store, "foo"), (_req, res) => {
     res.status(200).json({ success: true })
   })

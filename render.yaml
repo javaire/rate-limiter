@@ -3,6 +3,8 @@ services:
     name: rate-limiter
     runtime: docker
     plan: free
+    region: frankfurt
+    branch: main
     healthCheckPath: /health
     envVars:
       - key: STORE
@@ -15,3 +17,4 @@ services:
 databases:
   - name: rate-limiter-db
     plan: free
+    region: frankfurt
