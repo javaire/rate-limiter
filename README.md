@@ -23,6 +23,27 @@ client --(GET /foo, Authorization: Bearer <client-id>)--> [auth middleware]
 Both backends implement one `RateLimitStore` interface and are chosen at boot via `STORE`
 (`memory` = Redis, `persistent` = Postgres), so the rest of the app is backend-agnostic.
 
+### Services
+
+Docker Compose runs three services (`app`, `redis`, `postgres`); `STORE` picks which store the API talks to:
+
+```
+docker compose up
+        |
+        v
+   +-----------+
+   |    app    |  Express API  (:3000)
+   +-----+-----+
+         |  STORE selects ONE store
+    +----+--------------+
+    v                   v
++---------+        +-----------+
+|  redis  |        | postgres  |
+|  :6379  |        |   :5432   |
++---------+        +-----------+
+ STORE=memory      STORE=persistent
+```
+
 ## Clients
 
 Clients and limits live in [`src/config/clients.ts`](src/config/clients.ts):
@@ -40,15 +61,22 @@ counter.
 
 Requires **Node 22 LTS** (see `.nvmrc`).
 
-### Docker Compose (runs both stores)
+### Docker Compose
 
 ```bash
-docker compose up --build                  # memory / Redis-backed (default)
-STORE=persistent docker compose up --build # persistent / Postgres-backed
+# 1. create your local env file
+cp .env.example .env
+
+# 2. in .env set STORE=memory (Redis) or STORE=persistent (Postgres)
+docker compose up      # 3. start everything
 ```
 
-The API listens on `http://localhost:3000`. Redis and Postgres run as separate services so
-you can switch strategies via `STORE`.
+Compose auto-reads `.env`, so the `STORE` value there drives `${STORE:-memory}` in
+`docker-compose.yml` — no inline env var needed, `docker compose up` is enough. Use
+`docker compose up --build` on the first run or after changing code.
+
+The API listens on `http://localhost:3000`. Redis and Postgres both run as services, so you
+switch strategies by editing `STORE` in `.env`.
 
 ### Tests
 
