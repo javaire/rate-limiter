@@ -118,16 +118,3 @@ sensitive/auditable operations (payments, auth attempts, quota billing).
 - **Node 22 LTS** — pinned via `.nvmrc` + `engines`.
 - **Explicit `tsc` build** — type-checked, deterministic JS everywhere (Node's built-in TS
   support only strips types without checking).
-
-## Deployment (Render, free tier)
-
-A [`render.yaml`](render.yaml) blueprint provisions a free Docker web service plus a free
-Postgres instance (`STORE=persistent`):
-
-1. Push this repo to GitHub.
-2. In Render: **New > Blueprint**, point it at the repo, and apply.
-3. Render builds the Dockerfile, wires `DATABASE_URL` from managed Postgres, and injects `PORT`.
-
-Caveats: the free web service sleeps after ~15 min idle (first request cold-starts), and free
-Postgres expires after ~90 days. Both strategies are best demonstrated locally via Docker
-Compose; the cloud deployment uses Postgres by default.
