@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: rate-limiter
+    name: rate-limiter-persistent
     runtime: docker
     plan: free
     region: frankfurt
@@ -13,6 +13,29 @@ services:
         fromDatabase:
           name: rate-limiter-db
           property: connectionString
+
+  - type: web
+    name: rate-limiter-memory
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: STORE
+        value: memory
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: rate-limiter-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: rate-limiter-redis
+    plan: free
+    region: frankfurt
+    ipAllowList: []
+    maxmemoryPolicy: allkeys-lru
 
 databases:
   - name: rate-limiter-db
